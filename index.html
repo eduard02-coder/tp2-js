@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tp2-js</title>
+  </head>
+  <body class="landing-page">
+    <header>
+      <h1>Trabajo Práctico 2 - Javascript</h1>
+      <h5>Alumno: Eduardo O.</h5>
+      <hr />
+    </header>
+    <main>
+      <section class="objetivo">
+        <h2>Propuesta Elejida: Juego de Buscaminas (Minesweeper)</h2>
+        <h3>Objetivo del ejercicio:</h3>
+        <ul>
+          <li>Practicar la generación y manipulación dinámica del DOM.</li>
+          <li>
+            Utilizar lógica más avanzada para manejar estados de celdas
+            (abiertas, cerradas, banderas, minas).
+          </li>
+          <li>
+            Implementar funciones recursivas o de recorrido para descubrir
+            espacios vacíos automáticamente.
+          </li>
+          <li>
+            (Opcional) Usar localStorage para guardar el mejor tiempo del
+            jugador.
+          </li>
+        </ul>
+      </section>
+
+      <section class="ejercicio">
+        <h3>Ejercicio:</h3>
+        <ol>
+          <li>
+            <h4>Generar el Tablero</h4>
+            <ul>
+              <li>
+                Pide al usuario que elija el tamaño del tablero (ej. 8x8, 16x16)
+                y la cantidad de minas.
+              </li>
+
+              <li>Crea dinámicamente una cuadrícula con celdas HTML.</li>
+
+              <li>Ubica las minas de manera aleatoria.</li>
+            </ul>
+          </li>
+
+          <li>
+            <h4>Lógica del Juego</h4>
+            <ul>
+              <li>Al hacer clic en una celda:</li>
+
+              <li>
+                Si contiene una mina, mostrar un mensaje de “Game Over” y
+                revelar todas las minas.
+              </li>
+
+              <li>
+                Si no contiene mina, revela el número de minas adyacentes.
+              </li>
+
+              <li>
+                Si es 0 (celda vacía), revela automáticamente todas las celdas
+                adyacentes (y así sucesivamente) hasta topar con celdas que
+                tengan un número mayor que 0.
+              </li>
+
+              <li>
+                Al hacer clic derecho en una celda, se coloca o quita una
+                bandera (para marcar que hay una mina).
+              </li>
+            </ul>
+          </li>
+
+          <li>
+            <h4>Sistema de Victoria</h4>
+            <ul>
+              <li>
+                El juego finaliza con éxito si el usuario descubre todas las
+                celdas sin mina.
+              </li>
+
+              <li>
+                Muestra un mensaje de felicitación y el tiempo total de juego.
+              </li>
+            </ul>
+          </li>
+
+          <li>
+            <h4>(Opcional) Persistencia con localStorage</h4>
+
+            <ul>
+              <li>
+                Guarda el mejor tiempo para un tamaño de tablero determinado.
+              </li>
+
+              <li>
+                Si el usuario gana la partida en menor tiempo, actualiza ese
+                valor.
+              </li>
+            </ul>
+          </li>
+
+          <li>
+            <h4>Extras (ideas de mejora)</h4>
+            <ul>
+              <li>Añadir un contador de minas.</li>
+
+              <li>
+                Agregar diferentes niveles de dificultad (Fácil, Medio,
+                Difícil).
+              </li>
+
+              <li>Posibilidad de reiniciar el juego sin recargar la página.</li>
+            </ul>
+          </li>
+        </ol>
+      </section>
+
+      <section class="resolucion">
+        <p><a href="/minesweeper/index.html">Juego</a></p>
+      </section>
+    </main>
+    <script type="module" src="/src/import-styles.ts"></script>
+  </body>
+</html>
