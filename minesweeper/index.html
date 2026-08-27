@@ -12,6 +12,30 @@
       <p><a href="../index.html">Atrás</a></p>
       <hr />
     </header>
-    <script type="module" src="import-styles.ts"></script>
+    <main>
+      <section id="minesweeper">
+        <section class="prestart">
+          <h2>Tamaño de tablero</h2>
+          <ul class="board-sizes">
+            <li>9x9</li>
+            <li>16x16</li>
+            <li>16x30</li>
+            <li>20x30</li>
+          </ul>
+
+          <h2>Cantidad de minas</h2>
+          <ul>
+            <li>10</li>
+            <li>40</li>
+            <li>100</li>
+            <li>150</li>
+          </ul>
+          <button>Empezar</button>
+        </section>
+        <section class="game">game</section>
+      </section>
+    </main>
+    <script type="module" src="./ts/import-styles.ts"></script>
+    <script type="module" src="./ts/game.ts"></script>
   </body>
 </html>
