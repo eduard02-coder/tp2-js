@@ -20,7 +20,7 @@ interface selectorStyleType {
 
 class SettingsWindow {
   // --- set con constructor
-  #prestartCont: HTMLElement;
+  #settingsCont: HTMLElement;
   #gameCont: HTMLElement;
 
   #selectorStyle: selectorStyleType = {
@@ -36,8 +36,8 @@ class SettingsWindow {
   };
 
   constructor(MineSweeperContainer: HTMLElement) {
-    this.#prestartCont = MineSweeperContainer.getElementsByClassName(
-      'prestart',
+    this.#settingsCont = MineSweeperContainer.getElementsByClassName(
+      'settings',
     )[0] as HTMLElement;
 
     this.#gameCont = MineSweeperContainer.getElementsByClassName(
@@ -94,14 +94,14 @@ class SettingsWindow {
     }
   }
 
-  async #run() {
+  async run() {
     // --- DOM Elements
-    const prestartContainer = this.#prestartCont;
+    const settingsContainer = this.#settingsCont;
     const gameContainer = this.#gameCont;
-    const elemTamanios = prestartContainer.querySelectorAll(
+    const elemTamanios = settingsContainer.querySelectorAll(
       ' ul.board-sizes > li',
     ) as NodeListOf<HTMLLIElement>;
-    const startBt = prestartContainer.querySelector(
+    const startBt = settingsContainer.querySelector(
       'button',
     ) as HTMLButtonElement;
 
@@ -119,9 +119,8 @@ class SettingsWindow {
       const parent = entrada.parentElement as HTMLUListElement;
       const index = Array.prototype.indexOf.call(parent.children, entrada);
 
-      const mineOptionsUls = document.querySelectorAll(
-        '#minesweeper > section.prestart > ul.mine-options',
-      );
+      const mineOptionsUls =
+        settingsContainer.querySelectorAll('ul.mine-options');
 
       // --- hide all
       const length = mineOptionsUls.length;
@@ -145,7 +144,7 @@ class SettingsWindow {
       // --- start button
       const startBtHandler = () => {
         gameContainer.style.display = 'block';
-        prestartContainer.style.display = 'none';
+        settingsContainer.style.display = 'none';
         const arr = boardSize.value.split('x');
 
         resolve({
@@ -159,3 +158,5 @@ class SettingsWindow {
     });
   }
 }
+
+export { SettingsWindow, type settingsType };
