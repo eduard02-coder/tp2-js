@@ -40,16 +40,21 @@ body.minesweeper {
 
           > li {
             border: 1px solid $bg-color-dark;
-            width: 100%;
             text-align: center;
             padding: 10px 25px;
+            width: 70px;
             cursor: pointer;
 
             &:first-of-type {
               background-color: $bg-color-dark;
               color: $text-color-light;
-              width: 100px;
             }
+          }
+
+          &.mine-options-16x16,
+          &.mine-options-16x30,
+          &.mine-options-20x30 {
+            display: none;
           }
         }
 
