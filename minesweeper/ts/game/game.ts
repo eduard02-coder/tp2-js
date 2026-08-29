@@ -4,7 +4,7 @@ interface tileType {
   dom: HTMLElement;
   mined: boolean;
   open: boolean;
-  surrMines: number;
+  minesAround: number;
 }
 
 interface tileSurroundingType {
@@ -106,9 +106,15 @@ class MineSweeper {
       for (let k of keys) {
         if (surrounding[k] !== null) {
           if (!(surrounding[k] as tileType).mined) {
-            (surrounding[k] as tileType).dom.style.border = '2px solid black';
+            (surrounding[k] as tileType).minesAround += 1;
           }
         }
+      }
+    }
+
+    for (let tile of this.#tileArray) {
+      if (tile.minesAround) {
+        tile.dom.innerHTML = `<p class = "mines-around-${tile.minesAround}">${tile.minesAround}</p>`;
       }
     }
   }
@@ -129,13 +135,11 @@ class MineSweeper {
         dom: newDiv,
         open: false,
         mined: false,
-        surrMines: 0,
+        minesAround: 0,
       };
       this.#tileArray.push(tile);
 
       newDiv.className = 'closed';
-      const p = document.createElement('p');
-      newDiv.append(p);
     }
 
     this.#board.style.display = 'grid';
@@ -179,6 +183,24 @@ class MineSweeper {
         } else {
           // --- set tile open
           tile.dom.className = 'open';
+
+          if (!tile.minesAround) {
+            // --- get the tiles around it
+            const tilesAround = this.#tileSurrounding(tile);
+            const keys = Object.keys(
+              tilesAround,
+            ) as (keyof typeof tilesAround)[];
+
+            for (let k of keys) {
+              if (tilesAround[k]) {
+                if (!(tilesAround[k] as tileType).open) {
+                  if (!(tilesAround[k] as tileType).mined) {
+                    (tilesAround[k] as tileType).dom.click();
+                  }
+                }
+              }
+            }
+          }
         }
       });
     }
