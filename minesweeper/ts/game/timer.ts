@@ -45,25 +45,36 @@ class Timer {
         this.#time = startingTime;
       }
 
-      if (this.#format === 'min:sec:ms') {
-        this.#count = setInterval(() => {
-          if (this.#time.ms == 99) {
-            this.#counter();
+      // this.#count = setInterval(() => {
+      //   if (this.#time.ms == 99) {
+      //     if (this.#time.sec == 59) {
+      //       this.#time.sec = 0;
+      //       this.#time.min++;
+      //     } else {
+      //       this.#time.sec++;
+      //     }
+      //   } else {
+      //     this.#time.ms++;
+      //   }
+
+      //   this.#update();
+      // }, 10);
+
+      this.#count = setInterval(() => {
+        if (this.#time.ms == 99) {
+          this.#time.ms = 0;
+          if (this.#time.sec == 59) {
+            this.#time.sec = 0;
+            this.#time.min++;
           } else {
-            this.#time.ms++;
+            this.#time.sec++;
           }
+        } else {
+          this.#time.ms++;
+        }
 
-          this.#update();
-        }, 10);
-      }
-
-      if (this.#format === 'min:sec') {
-        this.#count = setInterval(() => {
-          this.#counter();
-
-          this.#update();
-        }, 1000);
-      }
+        this.#update();
+      }, 10);
     }
   }
 
