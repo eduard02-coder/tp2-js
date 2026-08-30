@@ -70,6 +70,11 @@ body.minesweeper {
       .game {
         display: none;
 
+        > .info-bar {
+          border: 1px solid black;
+          margin-bottom: 10px;
+        }
+
         > .board {
           background-color: #1b71c8;
           padding: 5px;
@@ -83,11 +88,20 @@ body.minesweeper {
             align-items: center;
             cursor: default;
 
+            &.closed {
+              background-color: #e3ecf6;
+            }
+
+            &.open {
+              background-color: #e3ecf630;
+            }
+
             > p {
               width: fit-content;
               line-height: 100%;
               font-weight: bolder;
               font-size: 20px;
+              display: none;
 
               &.mines-around-1 {
                 color: #fffefe;
@@ -122,12 +136,10 @@ body.minesweeper {
               }
             }
 
-            &.closed {
-              background-color: #e3ecf6;
-            }
-
-            &.open {
-              background-color: #e3ecf630;
+            > img {
+              &.red-flag {
+                width: 60%;
+              }
             }
           }
         }

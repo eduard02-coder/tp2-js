@@ -1,21 +1,12 @@
 import { SettingsWindow, type settingsType } from './setting-window.ts';
+import { Timer } from './timer.ts';
 
 interface tileType {
   dom: HTMLElement;
   mined: boolean;
   open: boolean;
+  flagged: boolean;
   minesAround: number;
-}
-
-interface tileSurroundingType {
-  up: null | tileType;
-  upRight: null | tileType;
-  right: null | tileType;
-  downRight: null | tileType;
-  down: null | tileType;
-  downLeft: null | tileType;
-  left: null | tileType;
-  upLeft: null | tileType;
 }
 
 class MineSweeper {
@@ -28,6 +19,8 @@ class MineSweeper {
   #tileArray: tileType[] = [];
   #settings!: settingsType;
   #mineTiles!: tileType[];
+  #infoBar!: HTMLElement;
+  #timer!: any;
 
   constructor(MineSweeperContainer: HTMLElement) {
     this.#gameCont = MineSweeperContainer.getElementsByClassName(
@@ -40,18 +33,16 @@ class MineSweeper {
   #tileSurrounding(tile: tileType) {
     const length = this.#tileArray.length;
     const positionOfTile = this.#tileArray.indexOf(tile);
-    const returnVal: tileSurroundingType = {
-      up: null,
-      upRight: null,
-      right: null,
-      downRight: null,
-      down: null,
-      downLeft: null,
-      left: null,
-      upLeft: null,
+    const returnVal = {
+      up: null as tileType | null,
+      upRight: null as tileType | null,
+      right: null as tileType | null,
+      downRight: null as tileType | null,
+      down: null as tileType | null,
+      downLeft: null as tileType | null,
+      left: null as tileType | null,
+      upLeft: null as tileType | null,
     };
-
-    // const nCol
 
     // --- left, right, up, down
     if (!(positionOfTile % this.#settings.cols === 0)) {
@@ -95,19 +86,20 @@ class MineSweeper {
       }
     }
 
-    return returnVal;
+    return Object.values(returnVal).filter((elem) => {
+      if (elem) {
+        return elem;
+      }
+    }) as tileType[];
   }
 
   #markAroundMines() {
     for (let tile of this.#mineTiles) {
       const surrounding = this.#tileSurrounding(tile);
-      const keys = Object.keys(surrounding) as (keyof typeof surrounding)[];
 
-      for (let k of keys) {
-        if (surrounding[k] !== null) {
-          if (!(surrounding[k] as tileType).mined) {
-            (surrounding[k] as tileType).minesAround += 1;
-          }
+      for (let tile of surrounding) {
+        if (!tile.mined) {
+          tile.minesAround += 1;
         }
       }
     }
@@ -119,7 +111,7 @@ class MineSweeper {
     }
   }
 
-  #populateBoard(settings: settingsType) {
+  #createBoard(settings: settingsType) {
     const cols = settings.cols;
     const rows = settings.rows;
     const totalTiles = cols * rows;
@@ -135,6 +127,7 @@ class MineSweeper {
         dom: newDiv,
         open: false,
         mined: false,
+        flagged: false,
         minesAround: 0,
       };
       this.#tileArray.push(tile);
@@ -160,19 +153,35 @@ class MineSweeper {
 
     for (let tile of this.#mineTiles) {
       tile.mined = true;
-
-      // --- borrar al terminar el desarrollo
-      tile.dom.style.backgroundColor = 'red';
     }
   }
 
   #eventsOnLoosing() {
+    this.#mineTiles.forEach((elem) => {
+      elem.open = true;
+      elem.dom.className = 'open';
+      elem.dom.innerHTML =
+        '<img src="./assets/img/mine.svg" class="mine" alt="red-flag" loading="lazy">';
+    });
+    // --- remove event form the board
     const container = this.#board;
     const newContainer = container.cloneNode(true);
     (container.parentNode as HTMLElement).replaceChild(newContainer, container);
   }
 
-  #setClickEvents() {
+  #clearEmptyTilesAround(tile: tileType) {
+    // --- get the tiles around it
+    const surrounding = this.#tileSurrounding(tile);
+    for (let tile of surrounding) {
+      if (!tile.open) {
+        if (!tile.mined) {
+          tile.dom.click();
+        }
+      }
+    }
+  }
+
+  #leftClicksOnTiles() {
     for (let tile of this.#tileArray) {
       tile.dom.addEventListener('click', () => {
         tile.open = true;
@@ -181,24 +190,17 @@ class MineSweeper {
         if (tile.mined) {
           this.#eventsOnLoosing();
         } else {
-          // --- set tile open
-          tile.dom.className = 'open';
+          if (!tile.flagged) {
+            // --- set tile open
+            tile.dom.className = 'open';
 
-          if (!tile.minesAround) {
-            // --- get the tiles around it
-            const tilesAround = this.#tileSurrounding(tile);
-            const keys = Object.keys(
-              tilesAround,
-            ) as (keyof typeof tilesAround)[];
+            const p = tile.dom.querySelector('p') as HTMLElement;
+            if (p) {
+              p.style.display = 'block';
+            }
 
-            for (let k of keys) {
-              if (tilesAround[k]) {
-                if (!(tilesAround[k] as tileType).open) {
-                  if (!(tilesAround[k] as tileType).mined) {
-                    (tilesAround[k] as tileType).dom.click();
-                  }
-                }
-              }
+            if (!tile.minesAround) {
+              this.#clearEmptyTilesAround(tile);
             }
           }
         }
@@ -206,14 +208,53 @@ class MineSweeper {
     }
   }
 
+  #rightClicksOnTiles() {
+    for (let tile of this.#tileArray) {
+      tile.dom.addEventListener('contextmenu', (event: Event) => {
+        event.preventDefault();
+
+        tile.flagged = !tile.flagged;
+
+        if (tile.flagged) {
+          tile.dom.innerHTML =
+            '<img src="./assets/img/red-flag.svg" class="red-flag" alt="red-flag" loading="lazy">';
+        } else {
+          tile.dom.innerHTML = '';
+        }
+      });
+    }
+  }
+
+  #createInfoBar() {
+    this.#infoBar = document.createElement('div');
+    this.#gameCont.append(this.#infoBar);
+    this.#infoBar.className = 'info-bar';
+
+    const timerCont = document.createElement('div');
+    this.#infoBar.append(timerCont);
+    timerCont.className = 'timer';
+
+    this.#timer = new Timer(timerCont, 'min:sec:ms');
+  }
+
   async start() {
     this.#settings = (await this.#settingsObj.run()) as settingsType;
-    console.log(this.#settings);
 
-    this.#populateBoard(this.#settings);
+    this.#createInfoBar();
+    this.#createBoard(this.#settings);
     this.#speadMines(this.#settings.mines);
     this.#markAroundMines();
-    this.#setClickEvents();
+    this.#leftClicksOnTiles();
+    this.#rightClicksOnTiles();
+
+    this.#timer.start();
+
+    // this.#timer.start();
+
+    // --- prevent context menu on game board
+    this.#board.addEventListener('contextmenu', (event: Event) => {
+      event.preventDefault;
+    });
   }
 }
 
