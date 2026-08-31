@@ -8,25 +8,17 @@ class Timer {
   #time = {
     min: 0,
     sec: 0,
-    ms: 0,
   };
   #count!: number;
   #element;
   #isRunning = false;
-  #format: string;
-  #counter = () => {
-    if (this.#time.sec == 59) {
-      this.#time.sec = 0;
-      this.#time.min++;
-    } else {
-      this.#time.sec++;
-    }
-  };
 
-  constructor(element: HTMLElement, format: string = 'min:sec:ms') {
+  constructor(element: HTMLElement) {
     this.#element = element;
-    this.#element.innerText = ' ';
-    this.#format = format;
+
+    if (!this.#element.innerText.length) {
+      this.#element.innerText = ' ';
+    }
   }
 
   get time() {
@@ -44,37 +36,31 @@ class Timer {
       if (startingTime) {
         this.#time = startingTime;
       }
+      const strFormat = (n: number) => {
+        return String(n).padStart(2, '0');
+      };
 
-      // this.#count = setInterval(() => {
-      //   if (this.#time.ms == 99) {
-      //     if (this.#time.sec == 59) {
-      //       this.#time.sec = 0;
-      //       this.#time.min++;
-      //     } else {
-      //       this.#time.sec++;
-      //     }
-      //   } else {
-      //     this.#time.ms++;
-      //   }
+      let minStr = strFormat(this.#time.min);
+      let secStr = strFormat(this.#time.sec);
 
-      //   this.#update();
-      // }, 10);
+      // --- initial value on DOM
+      (this.#element as HTMLElement).innerHTML =
+        `<span>${minStr}</span><span>${secStr}</span>`;
 
       this.#count = setInterval(() => {
-        if (this.#time.ms == 99) {
-          this.#time.ms = 0;
-          if (this.#time.sec == 59) {
-            this.#time.sec = 0;
-            this.#time.min++;
-          } else {
-            this.#time.sec++;
-          }
+        if (this.#time.sec == 59) {
+          this.#time.sec = 0;
+          this.#time.min++;
         } else {
-          this.#time.ms++;
+          this.#time.sec++;
         }
 
-        this.#update();
-      }, 10);
+        minStr = strFormat(this.#time.min);
+        secStr = strFormat(this.#time.sec);
+
+        (this.#element as HTMLElement).innerHTML =
+          `<span>${minStr}</span><span>${secStr}</span>`;
+      }, 1000);
     }
   }
 
@@ -83,15 +69,6 @@ class Timer {
       this.#isRunning = false;
       clearInterval(this.#count);
     }
-  }
-
-  #update() {
-    const mAlt = String(this.#time.min).padStart(2, '0');
-    const sAlt = String(this.#time.sec).padStart(2, '0');
-    const msAlt = String(this.#time.ms).padStart(2, '0');
-
-    (this.#element.firstChild as HTMLElement).nodeValue =
-      `${mAlt}:${sAlt}:${msAlt}`;
   }
 }
 

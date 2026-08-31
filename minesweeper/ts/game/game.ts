@@ -7,26 +7,30 @@ interface tileType {
   open: boolean;
   flagged: boolean;
   minesAround: number;
+  flagImgDom: HTMLElement;
+  pDom: HTMLElement;
 }
 
 class MineSweeper {
   // --- set con constructor
-  #gameCont: HTMLElement;
   #settingsObj: SettingsWindow;
+  #appCont: HTMLElement;
 
   // --- set later on
+  #gameCont!: HTMLElement;
   #board!: HTMLElement;
   #tileArray: tileType[] = [];
+  #mineTiles: tileType[] = [];
   #settings!: settingsType;
-  #mineTiles!: tileType[];
   #infoBar!: HTMLElement;
-  #timer!: any;
+  #timer!: Timer;
+  #flags!: number;
+  #mines!: number;
+  #flagCounter!: HTMLElement;
+  #emoji!: HTMLElement;
 
   constructor(MineSweeperContainer: HTMLElement) {
-    this.#gameCont = MineSweeperContainer.getElementsByClassName(
-      'game',
-    )[0] as HTMLElement;
-
+    this.#appCont = MineSweeperContainer;
     this.#settingsObj = new SettingsWindow(MineSweeperContainer);
   }
 
@@ -106,7 +110,7 @@ class MineSweeper {
 
     for (let tile of this.#tileArray) {
       if (tile.minesAround) {
-        tile.dom.innerHTML = `<p class = "mines-around-${tile.minesAround}">${tile.minesAround}</p>`;
+        tile.pDom.outerHTML = `<p class = "mines-around-${tile.minesAround}">${tile.minesAround}</p>`;
       }
     }
   }
@@ -123,22 +127,29 @@ class MineSweeper {
     for (let i = 0; i < totalTiles; i++) {
       const newDiv = document.createElement('div');
       this.#board.append(newDiv);
+
+      newDiv.className = 'closed';
+      const p = document.createElement('p');
+      const img = document.createElement('img');
+      img.src = './assets/img/red-flag.svg';
+      img.className = 'red-flag';
+      newDiv.append(p, img);
+
       const tile = {
         dom: newDiv,
         open: false,
         mined: false,
         flagged: false,
         minesAround: 0,
+        flagImgDom: img,
+        pDom: p,
       };
       this.#tileArray.push(tile);
-
-      newDiv.className = 'closed';
     }
 
     this.#board.style.display = 'grid';
     this.#board.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
     this.#board.style.gridTemplateRows = `repeat(${rows}, 30px)`;
-    this.#board.style.gap = '2px';
   }
 
   #speadMines(mines: number) {
@@ -161,8 +172,22 @@ class MineSweeper {
       elem.open = true;
       elem.dom.className = 'open';
       elem.dom.innerHTML =
-        '<img src="./assets/img/mine.svg" class="mine" alt="red-flag" loading="lazy">';
+        '<img src="./assets/img/mine.svg" class="mine" alt="mine" loading="lazy">';
     });
+    this.#removeEventsFromBoard();
+    this.#timer.stop();
+    this.#emoji.innerText = '😵';
+
+    this.#emergentBar('¡Has Perdido!');
+  }
+
+  #eventsOnWinning() {
+    this.#timer.stop();
+    this.#removeEventsFromBoard();
+    this.#emergentBar('¡Has Ganado!');
+  }
+
+  #removeEventsFromBoard() {
     // --- remove event form the board
     const container = this.#board;
     const newContainer = container.cloneNode(true);
@@ -184,6 +209,7 @@ class MineSweeper {
   #leftClicksOnTiles() {
     for (let tile of this.#tileArray) {
       tile.dom.addEventListener('click', () => {
+        this.#timer.start();
         tile.open = true;
 
         // --- if you hit a mine, ...
@@ -212,49 +238,150 @@ class MineSweeper {
     for (let tile of this.#tileArray) {
       tile.dom.addEventListener('contextmenu', (event: Event) => {
         event.preventDefault();
+        this.#timer.start();
 
-        tile.flagged = !tile.flagged;
+        const plantFlag = () => {
+          tile.flagged = true;
+          tile.flagImgDom.style.display = 'block';
+          this.#flags -= 1;
+          if (tile.mined) {
+            this.#mines -= 1;
 
-        if (tile.flagged) {
-          tile.dom.innerHTML =
-            '<img src="./assets/img/red-flag.svg" class="red-flag" alt="red-flag" loading="lazy">';
-        } else {
-          tile.dom.innerHTML = '';
+            if (!this.#mines) {
+              this.#eventsOnWinning();
+            }
+          }
+        };
+
+        const removeFlag = () => {
+          tile.flagged = false;
+          tile.flagImgDom.style.display = 'none';
+          this.#flags += 1;
+          if (tile.mined) {
+            this.#mines += 1;
+          }
+        };
+
+        if (!tile.open) {
+          if (!tile.flagged) {
+            if (this.#flags) {
+              plantFlag();
+            }
+          } else {
+            removeFlag();
+          }
         }
+
+        this.#flagCounter.innerText = String(this.#flags);
       });
     }
   }
 
   #createInfoBar() {
+    // --- info bar
     this.#infoBar = document.createElement('div');
     this.#gameCont.append(this.#infoBar);
     this.#infoBar.className = 'info-bar';
 
+    // --- timer
     const timerCont = document.createElement('div');
-    this.#infoBar.append(timerCont);
+    const p = document.createElement('p');
+    p.innerText = '00:00';
+    timerCont.append(p);
+
+    this.#timer = new Timer(p);
     timerCont.className = 'timer';
 
-    this.#timer = new Timer(timerCont, 'min:sec:ms');
+    // --- emoji
+    this.#emoji = document.createElement('div');
+    this.#emoji.innerText = '😃';
+    this.#emoji.className = 'emoji';
+
+    // --- mine counter
+    const mineCounterContainer = document.createElement('div');
+    mineCounterContainer.className = 'mine-counter';
+    mineCounterContainer.innerHTML =
+      '<img src="./assets/img/mine.svg" class="mine" alt="mine" loading="lazy">';
+    this.#flagCounter = document.createElement('span');
+    this.#flagCounter.innerText = String(this.#flags);
+    mineCounterContainer.append(this.#flagCounter);
+
+    // --- append everything
+    this.#infoBar.append(timerCont, this.#emoji, mineCounterContainer);
   }
 
-  async start() {
-    this.#settings = (await this.#settingsObj.run()) as settingsType;
+  #deleteEverything() {
+    this.#gameCont.remove();
+    this.#tileArray.length = 0;
+    this.#tileArray = [];
+    this.#mineTiles.length = 0;
+    this.#mineTiles = [];
+  }
+
+  #emergentBar(message: string) {
+    const newDiv = document.createElement('div');
+    this.#gameCont.append(newDiv);
+    newDiv.className = 'emergent-bar';
+
+    const restartBtn = document.createElement('button');
+    const newGamebtn = document.createElement('button');
+
+    restartBtn.innerText = 'Reiniciar';
+    newGamebtn.innerText = 'Nueva Partida';
+
+    restartBtn.addEventListener('click', () => {
+      this.#deleteEverything();
+      this.#startGame(this.#settings);
+    });
+
+    newGamebtn.addEventListener('click', () => {
+      this.#deleteEverything();
+      this.run();
+    });
+
+    const innerDiv = document.createElement('div');
+    innerDiv.append(restartBtn, newGamebtn);
+
+    const p = document.createElement('p');
+    p.className = 'message';
+    if (message.length) {
+      p.innerText = message;
+    }
+
+    newDiv.append(innerDiv, p);
+  }
+
+  #startGame(settings: settingsType) {
+    this.#gameCont = document.createElement('div');
+    this.#gameCont.className = 'game';
+    this.#appCont.append(this.#gameCont);
+
+    this.#flags = settings.mines;
+    this.#mines = settings.mines;
 
     this.#createInfoBar();
     this.#createBoard(this.#settings);
+
     this.#speadMines(this.#settings.mines);
     this.#markAroundMines();
+
     this.#leftClicksOnTiles();
     this.#rightClicksOnTiles();
 
-    this.#timer.start();
+    this.#board.addEventListener(
+      'contextmenu',
+      (event: Event) => {
+        event.preventDefault;
+      },
+      {
+        once: true,
+      },
+    );
+  }
 
-    // this.#timer.start();
-
-    // --- prevent context menu on game board
-    this.#board.addEventListener('contextmenu', (event: Event) => {
-      event.preventDefault;
-    });
+  async run() {
+    this.#settings = (await this.#settingsObj.run()) as settingsType;
+    this.#startGame(this.#settings);
   }
 }
 
@@ -264,7 +391,7 @@ async function main() {
   ) as HTMLElement;
 
   let game = new MineSweeper(MineSweeperContainer);
-  game.start();
+  game.run();
 }
 
 main();

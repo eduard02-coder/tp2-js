@@ -21,7 +21,7 @@ interface selectorStyleType {
 class SettingsWindow {
   // --- set con constructor
   #settingsCont: HTMLElement;
-  #gameCont: HTMLElement;
+  #appCont: HTMLElement;
 
   #selectorStyle: selectorStyleType = {
     selected: {
@@ -36,12 +36,9 @@ class SettingsWindow {
   };
 
   constructor(MineSweeperContainer: HTMLElement) {
+    this.#appCont = MineSweeperContainer;
     this.#settingsCont = MineSweeperContainer.getElementsByClassName(
       'settings',
-    )[0] as HTMLElement;
-
-    this.#gameCont = MineSweeperContainer.getElementsByClassName(
-      'game',
     )[0] as HTMLElement;
   }
 
@@ -97,7 +94,8 @@ class SettingsWindow {
   async run() {
     // --- DOM Elements
     const settingsContainer = this.#settingsCont;
-    const gameContainer = this.#gameCont;
+    settingsContainer.style.display = 'flex';
+
     const elemTamanios = settingsContainer.querySelectorAll(
       ' ul.board-sizes > li',
     ) as NodeListOf<HTMLLIElement>;
@@ -143,7 +141,6 @@ class SettingsWindow {
     return new Promise((resolve) => {
       // --- start button
       const startBtHandler = () => {
-        gameContainer.style.display = 'block';
         settingsContainer.style.display = 'none';
         const arr = boardSize.value.split('x');
 

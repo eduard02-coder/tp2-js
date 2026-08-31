@@ -68,11 +68,41 @@ body.minesweeper {
       }
 
       .game {
-        display: none;
-
         > .info-bar {
           border: 1px solid black;
           margin-bottom: 10px;
+
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          padding: 5px;
+
+          > .timer {
+            > p {
+              > span:first-of-type {
+                &:after {
+                  content: ':';
+                }
+              }
+            }
+          }
+
+          > .emoji {
+            font-size: 30px;
+          }
+
+          > .mine-counter {
+            > img.mine {
+              width: 20px;
+            }
+
+            > span {
+              &:before {
+                content: ' ';
+              }
+            }
+          }
         }
 
         > .board {
@@ -81,6 +111,8 @@ body.minesweeper {
           border-radius: 5px;
 
           > div {
+            box-sizing: border-box;
+            border: 1px solid #1b71c8;
             border-radius: 2px;
             box-shadow: inset 0 -2px 4px #1b71c89c;
             display: flex;
@@ -138,9 +170,35 @@ body.minesweeper {
 
             > img {
               &.red-flag {
+                display: none;
                 width: 60%;
               }
+
+              &.mine {
+                width: 90%;
+              }
             }
+          }
+        }
+
+        > .emergent-bar {
+          > div {
+            &:first-of-type {
+              display: flex;
+              border: 1px solid black;
+              justify-content: space-around;
+              padding: 10px;
+              margin-top: 10px;
+
+              > button {
+                padding: 5px;
+              }
+            }
+          }
+
+          > p {
+            margin-top: 10px;
+            text-align: center;
           }
         }
       }
