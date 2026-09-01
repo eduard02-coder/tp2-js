@@ -45,7 +45,7 @@ body.minesweeper {
             width: 70px;
             cursor: pointer;
 
-            &:first-of-type {
+            &.selected {
               background-color: $bg-color-dark;
               color: $text-color-light;
             }

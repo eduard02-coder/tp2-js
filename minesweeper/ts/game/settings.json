@@ -1,0 +1,33 @@
+[
+  {
+    "boardSize": {
+      "cols": 9,
+      "rows": 9
+    },
+    "mineOptions": [10, 15, 20]
+  },
+
+  {
+    "boardSize": {
+      "cols": 16,
+      "rows": 16
+    },
+    "mineOptions": [25, 50, 75]
+  },
+
+  {
+    "boardSize": {
+      "cols": 16,
+      "rows": 30
+    },
+    "mineOptions": [50, 115, 180]
+  },
+
+  {
+    "boardSize": {
+      "cols": 20,
+      "rows": 30
+    },
+    "mineOptions": [70, 175, 220]
+  }
+]

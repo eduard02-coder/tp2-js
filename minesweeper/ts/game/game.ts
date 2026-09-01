@@ -1,4 +1,4 @@
-import { SettingsWindow, type settingsType } from './setting-window.ts';
+import { SettingsWindow, type settingsType } from './settings.ts';
 import { Timer } from './timer.ts';
 
 interface tileType {
@@ -381,7 +381,7 @@ class MineSweeper {
 
   async run() {
     this.#settings = (await this.#settingsObj.run()) as settingsType;
-    this.#startGame(this.#settings);
+    // this.#startGame(this.#settings);
   }
 }
 
