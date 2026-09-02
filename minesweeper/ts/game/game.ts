@@ -381,7 +381,7 @@ class MineSweeper {
 
   async run() {
     this.#settings = (await this.#settingsObj.run()) as settingsType;
-    // this.#startGame(this.#settings);
+    this.#startGame(this.#settings);
   }
 }
 

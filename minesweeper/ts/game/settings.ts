@@ -17,16 +17,16 @@ class SettingsWindow {
   };
   #ulMinas!: HTMLUListElement;
   #ulTablero!: HTMLUListElement;
-  #selectedBoardIndex!: number;
+  #startBtn!: HTMLElement;
 
   constructor(appCont: HTMLElement) {
     this.#appCont = appCont;
   }
 
-  #boardSelectEvents() {
-    // --- set board sizes
-    const eventHandler = (event: Event) => {
-      const clickedLi = event.target as HTMLElement;
+  #setEvents() {
+    // --- board size and mine quantity selection events --- //
+    const markLi = (li: HTMLElement) => {
+      const clickedLi = li;
 
       // --- get its siblings
       const siblings = (clickedLi.parentElement as HTMLElement).children;
@@ -40,46 +40,56 @@ class SettingsWindow {
       clickedLi.className = 'selected';
 
       // --- index of the clicked li
-      this.#selectedBoardIndex = Array.from(siblings).indexOf(clickedLi);
+      return Array.from(siblings).indexOf(clickedLi);
+    };
+
+    const boardSelectHandler = (event: Event) => {
+      const clickedLi = event.target as HTMLElement;
+
+      // --- get index of the clicked li and mark style it differently on css
+      const selectedBoardIndex = markLi(clickedLi);
 
       // --- save the selected board size
-      this.#settings.cols =
-        settingsFromFile[this.#selectedBoardIndex].boardSize.cols;
-      this.#settings.rows =
-        settingsFromFile[this.#selectedBoardIndex].boardSize.rows;
+      this.#settings.cols = settingsFromFile[selectedBoardIndex].boardSize.cols;
+      this.#settings.rows = settingsFromFile[selectedBoardIndex].boardSize.rows;
 
       // --- get the mine options accordingly
-      const mineOptions =
-        settingsFromFile[this.#selectedBoardIndex].mineOptions;
+      const mineOptions = settingsFromFile[selectedBoardIndex].mineOptions;
 
-      // --- display mine options
+      // --- display mine options and set events on them
       this.#ulMinas.replaceChildren();
+
+      const mineSelectHandler = (event: Event) => {
+        const clickedLi = event.target as HTMLElement;
+
+        // --- get index of the clicked li and mark style it differently on css
+        const selectedMineIndex = markLi(clickedLi);
+
+        // --- save the selected mine quantity
+        this.#settings.mines =
+          settingsFromFile[selectedBoardIndex].mineOptions[selectedMineIndex];
+      };
 
       mineOptions.forEach((elem) => {
         const newLi = document.createElement('li');
         newLi.innerText = String(elem);
         this.#ulMinas.append(newLi);
+
+        newLi.addEventListener('click', mineSelectHandler);
       });
+
+      // --- click on the first mine option
+      (this.#ulMinas.children[0] as HTMLElement).click();
     };
 
     settingsFromFile.forEach((elem) => {
       const newLi = document.createElement('li');
       newLi.innerText = `${elem.boardSize.rows}x${elem.boardSize.cols}`;
       this.#ulTablero.append(newLi);
-      newLi.addEventListener('click', eventHandler);
+      newLi.addEventListener('click', boardSelectHandler);
     });
 
     (this.#ulTablero.children[0] as HTMLElement).click();
-  }
-
-  #mineSelectEvents() {
-    const mineLis = this.#ulMinas.children;
-
-    for (let li of mineLis) {
-      li.addEventListener('click', () => {
-        li.className = 'selected';
-      });
-    }
   }
 
   #createWindow() {
@@ -101,8 +111,8 @@ class SettingsWindow {
     this.#ulMinas.classList.add('mine-options');
 
     // --- boton empezar
-    const startBt = document.createElement('button');
-    startBt.innerText = 'EMPEZAR';
+    this.#startBtn = document.createElement('button');
+    this.#startBtn.innerText = 'EMPEZAR';
 
     // --- agregar todo
     this.#settingsCont.append(
@@ -110,16 +120,23 @@ class SettingsWindow {
       this.#ulTablero,
       h2Minas,
       this.#ulMinas,
-      startBt,
+      this.#startBtn,
     );
   }
 
   async run() {
     this.#createWindow();
-    this.#boardSelectEvents();
-    this.#mineSelectEvents();
+    this.#setEvents();
 
-    return this.#settings;
+    return new Promise((resolve) => {
+      // --- start button
+      const startBtHandler = () => {
+        this.#settingsCont.remove();
+        resolve(this.#settings);
+      };
+
+      this.#startBtn.addEventListener('click', startBtHandler);
+    });
   }
 }
 

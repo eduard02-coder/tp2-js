@@ -17,16 +17,16 @@
 
   {
     "boardSize": {
-      "cols": 16,
-      "rows": 30
+      "cols": 30,
+      "rows": 16
     },
     "mineOptions": [50, 115, 180]
   },
 
   {
     "boardSize": {
-      "cols": 20,
-      "rows": 30
+      "cols": 30,
+      "rows": 20
     },
     "mineOptions": [70, 175, 220]
   }
