@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: './',
+  base: '/tp2-js/',
 
   build: {
     rollupOptions: {
