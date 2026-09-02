@@ -304,8 +304,7 @@ class MineSweeper {
     // --- mine counter
     const mineCounterContainer = document.createElement('div');
     mineCounterContainer.className = 'mine-counter';
-    mineCounterContainer.innerHTML =
-      '<img src="./assets/img/mine.svg" class="mine" alt="mine" loading="lazy">';
+    mineCounterContainer.innerHTML = `<img src="${mineSvg}" class="mine" alt="mine" loading="lazy">`;
     this.#flagCounter = document.createElement('span');
     this.#flagCounter.innerText = String(this.#flags);
     mineCounterContainer.append(this.#flagCounter);
