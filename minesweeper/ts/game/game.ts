@@ -1,5 +1,7 @@
 import { SettingsWindow, type settingsType } from './settings.ts';
 import { Timer } from './timer.ts';
+import redFlagSvg from '../../assets/img/red-flag.svg';
+import mineSvg from '../../assets/img/mine.svg';
 
 interface tileType {
   dom: HTMLElement;
@@ -131,7 +133,7 @@ class MineSweeper {
       newDiv.className = 'closed';
       const p = document.createElement('p');
       const img = document.createElement('img');
-      img.src = './assets/img/red-flag.svg';
+      img.src = redFlagSvg;
       img.className = 'red-flag';
       newDiv.append(p, img);
 
@@ -171,8 +173,7 @@ class MineSweeper {
     this.#mineTiles.forEach((elem) => {
       elem.open = true;
       elem.dom.className = 'open';
-      elem.dom.innerHTML =
-        '<img src="./assets/img/mine.svg" class="mine" alt="mine" loading="lazy">';
+      elem.dom.innerHTML = `<img src="${mineSvg}" class="mine" alt="mine" loading="lazy">`;
     });
     this.#removeEventsFromBoard();
     this.#timer.stop();
@@ -200,7 +201,9 @@ class MineSweeper {
     for (let tile of surrounding) {
       if (!tile.open) {
         if (!tile.mined) {
-          tile.dom.click();
+          if (!tile.flagged) {
+            tile.dom.click();
+          }
         }
       }
     }
@@ -210,14 +213,15 @@ class MineSweeper {
     for (let tile of this.#tileArray) {
       tile.dom.addEventListener('click', () => {
         this.#timer.start();
-        tile.open = true;
 
-        // --- if you hit a mine, ...
-        if (tile.mined) {
-          this.#eventsOnLoosing();
-        } else {
-          if (!tile.flagged) {
-            // --- set tile open
+        if (!tile.flagged) {
+          tile.open = true;
+
+          // --- if you hit a mine, ...
+          if (tile.mined) {
+            this.#eventsOnLoosing();
+          } else {
+            // --- style tile as open
             tile.dom.className = 'open';
 
             const p = tile.dom.querySelector('p') as HTMLElement;
